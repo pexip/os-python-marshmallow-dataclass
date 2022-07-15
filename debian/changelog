@@ -1,0 +1,15 @@
+python-marshmallow-dataclass (8.5.8-2) unstable; urgency=medium
+
+  * Add autopkgtests
+  * Add dataclasses to d/py3dist-overrides
+  * d/control: Add missing Recommends
+  * d/control: add nocheck tags on test-specific Build-Deps
+  * Run wrap-and-sort -bastk
+
+ -- Jérôme Charaoui <jerome@riseup.net>  Thu, 14 Jul 2022 21:54:12 -0400
+
+python-marshmallow-dataclass (8.5.8-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #1013077)
+
+ -- Jérôme Charaoui <jerome@riseup.net>  Sat, 18 Jun 2022 09:23:15 -0400

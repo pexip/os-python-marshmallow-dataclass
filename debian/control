@@ -1,0 +1,33 @@
+Source: python-marshmallow-dataclass
+Section: python
+Priority: optional
+Maintainer: Debian Python Team <team+python@tracker.debian.org>
+Uploaders:
+ Jérôme Charaoui <jerome@riseup.net>,
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ pybuild-plugin-pyproject,
+ python3-all,
+ python3-marshmallow,
+ python3-marshmallow-enum,
+ python3-pytest <!nocheck>,
+ python3-setuptools,
+ python3-typeguard <!nocheck>,
+ python3-typing-inspect <!nocheck>,
+Standards-Version: 4.6.1
+Rules-Requires-Root: no
+Homepage: https://github.com/lovasoa/marshmallow_dataclass
+Vcs-Git: https://salsa.debian.org/python-team/packages/python-marshmallow-dataclass.git
+Vcs-Browser: https://salsa.debian.org/python-team/packages/python-marshmallow-dataclass
+
+Package: python3-marshmallow-dataclass
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+Recommends:
+ python3-marshmallow-enum,
+ python3-typing-inspect,
+Description: Automatic generation of marshmallow schemas from dataclasses
+ Python library to convert dataclasses into marshmallow schemas.

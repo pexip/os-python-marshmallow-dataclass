@@ -1,0 +1,8 @@
+Tests: upstream
+Depends:
+ python3-all,
+ python3-marshmallow-enum,
+ python3-pytest,
+ python3-typeguard,
+ python3-typing-inspect,
+ @,
