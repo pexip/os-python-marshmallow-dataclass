@@ -1,3 +1,9 @@
+python-marshmallow-dataclass (8.5.8-2pexip1) pexip; urgency=medium
+
+  * Prepare Pexip packaging
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Tue, 09 Aug 2022 09:59:08 +0100
+
 python-marshmallow-dataclass (8.5.8-2) unstable; urgency=medium
 
   * Add autopkgtests
