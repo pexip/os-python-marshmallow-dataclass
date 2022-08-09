@@ -1,4 +1,4 @@
-python-marshmallow-dataclass (8.5.8-2pexip1) pexip; urgency=medium
+python-marshmallow-dataclass (8.5.8-2pexip1) pexip-bullseye; urgency=medium
 
   * Prepare Pexip packaging
 
