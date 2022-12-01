@@ -1,3 +1,21 @@
+python-marshmallow-dataclass (8.5.10-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream version. (Closes: #1025108)
+  * d/patches: remove 'fix_broken_types.patch', as it has been upstreamed.
+  * d/control: make the binary package's description longer, as recommended by
+    lintian.
+
+ -- Louis-Philippe Véronneau <pollo@debian.org>  Thu, 01 Dec 2022 16:27:58 -0500
+
+python-marshmallow-dataclass (8.5.8-3) unstable; urgency=medium
+
+  * Team upload.
+  * d/patches/fix_broken_types.patch: from upstream
+    Closes: #1019391, #1020099
+
+ -- Michael R. Crusoe <crusoe@debian.org>  Sat, 01 Oct 2022 12:25:37 +0200
+
 python-marshmallow-dataclass (8.5.8-2) unstable; urgency=medium
 
   * Add autopkgtests
