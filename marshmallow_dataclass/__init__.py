@@ -48,6 +48,7 @@ from typing import (
     Dict,
     List,
     Mapping,
+    NewType as typing_NewType,
     Optional,
     Set,
     Tuple,
@@ -383,10 +384,10 @@ def _internal_class_schema(
             )
             created_dataclass: type = dataclasses.dataclass(clazz)
             return _internal_class_schema(created_dataclass, base_schema, clazz_frame)
-        except Exception:
+        except Exception as exc:
             raise TypeError(
                 f"{getattr(clazz, '__name__', repr(clazz))} is not a dataclass and cannot be turned into one."
-            )
+            ) from exc
 
     # Copy all marshmallow hooks and whitelisted members of the dataclass to the schema.
     attributes = {
@@ -469,17 +470,17 @@ def _field_by_supertype(
 
 def _generic_type_add_any(typ: type) -> type:
     """if typ is generic type without arguments, replace them by Any."""
-    if typ is list:
+    if typ is list or typ is List:
         typ = List[Any]
-    elif typ is dict:
+    elif typ is dict or typ is Dict:
         typ = Dict[Any, Any]
     elif typ is Mapping:
         typ = Mapping[Any, Any]
     elif typ is Sequence:
         typ = Sequence[Any]
-    elif typ is Set:
+    elif typ is set or typ is Set:
         typ = Set[Any]
-    elif typ is FrozenSet:
+    elif typ is frozenset or typ is FrozenSet:
         typ = FrozenSet[Any]
     return typ
 
@@ -494,8 +495,8 @@ def _field_for_generic_type(
     If the type is a generic interface, resolve the arguments and construct the appropriate Field.
     """
     origin = typing_inspect.get_origin(typ)
+    arguments = typing_inspect.get_args(typ, True)
     if origin:
-        arguments = typing_inspect.get_args(typ, True)
         # Override base_schema.TYPE_MAPPING to change the class used for generic types below
         type_mapping = base_schema.TYPE_MAPPING if base_schema else {}
 
@@ -508,7 +509,11 @@ def _field_for_generic_type(
                 type_mapping.get(List, marshmallow.fields.List),
             )
             return list_type(child_type, **metadata)
-        if origin in (collections.abc.Sequence, Sequence):
+        if origin in (collections.abc.Sequence, Sequence) or (
+            origin in (tuple, Tuple)
+            and len(arguments) == 2
+            and arguments[1] is Ellipsis
+        ):
             from . import collection_field
 
             child_type = field_for_schema(
@@ -556,38 +561,38 @@ def _field_for_generic_type(
                 ),
                 **metadata,
             )
-        elif typing_inspect.is_union_type(typ):
-            if typing_inspect.is_optional_type(typ):
-                metadata["allow_none"] = metadata.get("allow_none", True)
-                metadata["dump_default"] = metadata.get("dump_default", None)
-                if not metadata.get("required"):
-                    metadata["load_default"] = metadata.get("load_default", None)
-                metadata.setdefault("required", False)
-            subtypes = [t for t in arguments if t is not NoneType]  # type: ignore
-            if len(subtypes) == 1:
-                return field_for_schema(
-                    subtypes[0],
-                    metadata=metadata,
-                    base_schema=base_schema,
-                    typ_frame=typ_frame,
-                )
-            from . import union_field
-
-            return union_field.Union(
-                [
-                    (
-                        subtyp,
-                        field_for_schema(
-                            subtyp,
-                            metadata={"required": True},
-                            base_schema=base_schema,
-                            typ_frame=typ_frame,
-                        ),
-                    )
-                    for subtyp in subtypes
-                ],
-                **metadata,
+    if typing_inspect.is_union_type(typ):
+        if typing_inspect.is_optional_type(typ):
+            metadata["allow_none"] = metadata.get("allow_none", True)
+            metadata["dump_default"] = metadata.get("dump_default", None)
+            if not metadata.get("required"):
+                metadata["load_default"] = metadata.get("load_default", None)
+            metadata.setdefault("required", False)
+        subtypes = [t for t in arguments if t is not NoneType]  # type: ignore
+        if len(subtypes) == 1:
+            return field_for_schema(
+                subtypes[0],
+                metadata=metadata,
+                base_schema=base_schema,
+                typ_frame=typ_frame,
             )
+        from . import union_field
+
+        return union_field.Union(
+            [
+                (
+                    subtyp,
+                    field_for_schema(
+                        subtyp,
+                        metadata={"required": True},
+                        base_schema=base_schema,
+                        typ_frame=typ_frame,
+                    ),
+                )
+                for subtyp in subtypes
+            ],
+            **metadata,
+        )
     return None
 
 
@@ -805,12 +810,8 @@ def NewType(
     marshmallow.exceptions.ValidationError: {'mail': ['Not a valid email address.']}
     """
 
-    def new_type(x: _U):
-        return x
-
-    new_type.__name__ = name
     # noinspection PyTypeHints
-    new_type.__supertype__ = typ  # type: ignore
+    new_type = typing_NewType(name, typ)  # type: ignore
     # noinspection PyTypeHints
     new_type._marshmallow_field = field  # type: ignore
     # noinspection PyTypeHints
