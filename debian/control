@@ -31,5 +31,7 @@ Depends:
 Recommends:
  python3-marshmallow-enum,
  python3-typing-inspect,
+Breaks: python3-typing-inspect (<< 0.8.0)
 Description: Automatic generation of marshmallow schemas from dataclasses
- Python library to convert dataclasses into marshmallow schemas.
+ Python library to convert dataclasses into marshmallow schemas. It provides
+ automatic generation of marshmallow schemas from dataclasses.

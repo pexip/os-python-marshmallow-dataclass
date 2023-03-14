@@ -4,5 +4,5 @@ Depends:
  python3-marshmallow-enum,
  python3-pytest,
  python3-typeguard,
- python3-typing-inspect,
+ python3-typing-inspect (>= 0.8.0),
  @,
