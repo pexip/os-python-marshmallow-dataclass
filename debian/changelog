@@ -1,3 +1,9 @@
+python-marshmallow-dataclass (8.5.10-1pexip2) pexip; urgency=medium
+
+  * Make python3-marshmallow-enum and python3-typeguard runtime deps
+
+ -- Huw Jones <huw@pexip.com>  Wed, 24 May 2023 14:08:27 +0100
+
 python-marshmallow-dataclass (8.5.10-1pexip1) pexip; urgency=medium
 
   * New upstream release

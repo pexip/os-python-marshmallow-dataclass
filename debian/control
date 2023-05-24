@@ -28,8 +28,9 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${python3:Depends},
-Recommends:
  python3-marshmallow-enum,
+ python3-typeguard,
+Recommends:
  python3-typing-inspect,
 Breaks: python3-typing-inspect (<< 0.8.0)
 Description: Automatic generation of marshmallow schemas from dataclasses
