@@ -1,3 +1,13 @@
+python-marshmallow-dataclass (8.5.14-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream version.
+  * d/control: drop obsolete python3-marshmallow-enum dependency.
+    (Closes: #1040068)
+  * d/control: Standards-Version update to 4.6.2. No changes.
+
+ -- Louis-Philippe Véronneau <pollo@debian.org>  Mon, 04 Sep 2023 22:11:56 -0400
+
 python-marshmallow-dataclass (8.5.10-1) unstable; urgency=medium
 
   * Team upload.
