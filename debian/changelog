@@ -1,3 +1,9 @@
+python-marshmallow-dataclass (8.5.10-1pexip5) pexip; urgency=medium
+
+  * Add patch to allow de-/serializing of non-inited fields
+
+ -- Huw Jones <huw@pexip.com>  Fri, 15 Sep 2023 12:06:46 +0100
+
 python-marshmallow-dataclass (8.5.10-1pexip4) pexip; urgency=medium
 
   * Use native enum and drop python3-marshmallow-enum dep
