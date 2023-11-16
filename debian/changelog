@@ -1,3 +1,9 @@
+python-marshmallow-dataclass (8.5.10-1pexip6) pexip-bookworm; urgency=medium
+
+  * Initial bookworm build
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Thu, 16 Nov 2023 10:24:26 +0000
+
 python-marshmallow-dataclass (8.5.10-1pexip5) pexip; urgency=medium
 
   * Add patch to allow de-/serializing of non-inited fields
