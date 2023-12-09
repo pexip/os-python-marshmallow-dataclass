@@ -1,3 +1,9 @@
+python-marshmallow-dataclass (8.5.10-1pexip7) pexip-bookworm; urgency=medium
+
+  * Bookworm build for product distribution
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Sat, 09 Dec 2023 22:57:34 +0000
+
 python-marshmallow-dataclass (8.5.10-1pexip6) pexip-bookworm; urgency=medium
 
   * Initial bookworm build
