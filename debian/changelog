@@ -2,6 +2,7 @@ python-marshmallow-dataclass (8.5.14-1+pexip24u1) pexip; urgency=medium
 
   * New upstream release
   * Refresh non-inited fields patch from upstream
+  * Apply patch to fix potential memory leaks
 
  -- Huw Jones <huw@pexip.com>  Wed, 02 Oct 2024 10:58:07 +0100
 
