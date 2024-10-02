@@ -1,0 +1,190 @@
+From 5f38b9386029b73460a043967060886f2a0d83de Mon Sep 17 00:00:00 2001
+From: Huw Jones <huw@huwcbjones.co.uk>
+Date: Sat, 16 Sep 2023 20:39:28 +0100
+Subject: [PATCH] Add Meta option to include non init-ed fields (#246)
+
+* fix bitrot in tests
+
+* Add Meta option to include non init-ed fields
+
+Updates #60
+
+* ensure fields are always compared in a deterministic order
+
+* maxdiff none
+
+* update pypy
+
+* skip failing test on python3.6
+
+* Revert "skip failing test on python3.6"
+
+This reverts commit e8e29b9a45ad76d7894910b9350cb025071c28b8.
+
+* fixup! fix bitrot in tests
+
+We do care about the order of Union.union_fields.
+
+This partially reverts commit cbad82bdce3d8d7605f2767c050ca1f539d7d5b5.
+
+* Ignore union ordering
+
+---------
+
+Co-authored-by: lovasoa <pere.jobs@gmail.com>
+Co-authored-by: Jeff Dairiki <dairiki@dairiki.org>
+---
+ .github/workflows/python-package.yml |  2 +-
+ marshmallow_dataclass/__init__.py    | 22 +++++++++++++++++++++-
+ tests/test_class_schema.py           | 23 +++++++++++++++++++++++
+ tests/test_field_for_schema.py       | 19 ++++++++++++++-----
+ tests/test_mypy.yml                  |  1 +
+ 5 files changed, 60 insertions(+), 7 deletions(-)
+
+diff --git a/.github/workflows/python-package.yml b/.github/workflows/python-package.yml
+index fe88353..e6cc862 100644
+--- a/.github/workflows/python-package.yml
++++ b/.github/workflows/python-package.yml
+@@ -12,7 +12,7 @@ jobs:
+       fail-fast: false
+       matrix:
+         os: ["ubuntu-latest"]
+-        python_version: ["3.7", "3.8", "3.9", "3.10", "3.11", "pypy3.9"]
++        python_version: ["3.7", "3.8", "3.9", "3.10", "3.11", "pypy3.10"]
+         include:
+           - os: "ubuntu-20.04"
+             python_version: "3.6"
+diff --git a/marshmallow_dataclass/__init__.py b/marshmallow_dataclass/__init__.py
+index aa47ab0..1a5a2f4 100644
+--- a/marshmallow_dataclass/__init__.py
++++ b/marshmallow_dataclass/__init__.py
+@@ -297,6 +297,9 @@ def class_schema(
+     >>> person
+     Person(name='Anonymous', friends=[Person(name='Roger Boucher', friends=[])])
+ 
++    Marking dataclass fields as non-initialized (``init=False``), by default, will result in those
++    fields from being exluded in the schema. To override this behaviour, set the ``Meta`` option
++    ``include_non_init=True``.
+     >>> @dataclasses.dataclass()
+     ... class C:
+     ...   important: int = dataclasses.field(init=True, default=0)
+@@ -310,6 +313,20 @@ def class_schema(
+     >>> c
+     C(important=9, unimportant=0)
+ 
++    >>> @dataclasses.dataclass()
++    ... class C:
++    ...   class Meta:
++    ...     include_non_init = True
++    ...   important: int = dataclasses.field(init=True, default=0)
++    ...   unimportant: int = dataclasses.field(init=False, default=0)
++    ...
++    >>> c = class_schema(C)().load({
++    ...     "important": 9, # This field will be imported
++    ...     "unimportant": 9 # This field will be imported
++    ... }, unknown=marshmallow.EXCLUDE)
++    >>> c
++    C(important=9, unimportant=9)
++
+     >>> @dataclasses.dataclass
+     ... class Website:
+     ...  url:str = dataclasses.field(metadata = {
+@@ -408,6 +425,9 @@ def _internal_class_schema(
+         if hasattr(v, "__marshmallow_hook__") or k in MEMBERS_WHITELIST
+     }
+ 
++    # Determine whether we should include non-init fields
++    include_non_init = getattr(getattr(clazz, "Meta", None), "include_non_init", False)
++
+     # Update the schema members to contain marshmallow fields instead of dataclass fields
+     type_hints = get_type_hints(
+         clazz, localns=clazz_frame.f_locals if clazz_frame else None
+@@ -424,7 +444,7 @@ def _internal_class_schema(
+             ),
+         )
+         for field in fields
+-        if field.init
++        if field.init or include_non_init
+     )
+ 
+     schema_class = type(clazz.__name__, (_base_schema(clazz, base_schema),), attributes)
+diff --git a/tests/test_class_schema.py b/tests/test_class_schema.py
+index aa82975..28185a4 100644
+--- a/tests/test_class_schema.py
++++ b/tests/test_class_schema.py
+@@ -434,6 +434,29 @@ class Second:
+             {"first": {"second": {"first": None}}},
+         )
+ 
++    def test_init_fields(self):
++        @dataclasses.dataclass
++        class NoMeta:
++            no_init: str = dataclasses.field(init=False)
++
++        @dataclasses.dataclass
++        class NoInit:
++            class Meta:
++                pass
++
++            no_init: str = dataclasses.field(init=False)
++
++        @dataclasses.dataclass
++        class Init:
++            class Meta:
++                include_non_init = True
++
++            no_init: str = dataclasses.field(init=False)
++
++        self.assertNotIn("no_init", class_schema(NoMeta)().fields)
++        self.assertNotIn("no_init", class_schema(NoInit)().fields)
++        self.assertIn("no_init", class_schema(Init)().fields)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/test_field_for_schema.py b/tests/test_field_for_schema.py
+index 0e60f0b..22fe440 100644
+--- a/tests/test_field_for_schema.py
++++ b/tests/test_field_for_schema.py
+@@ -21,15 +21,24 @@
+ 
+ 
+ class TestFieldForSchema(unittest.TestCase):
++    maxDiff = None
++
+     def assertFieldsEqual(self, a: fields.Field, b: fields.Field):
+         self.assertEqual(a.__class__, b.__class__, "field class")
+ 
++        def canonical(k, v):
++            if k == "union_fields":
++                # See https://github.com/lovasoa/marshmallow_dataclass/pull/246#issuecomment-1722291806
++                return k, sorted(map(repr, v))
++            elif inspect.isclass(v):
++                return k, f"{v!r} ({v.__mro__!r})"
++            else:
++                return k, repr(v)
++
+         def attrs(x):
+-            return {
+-                k: f"{v!r} ({v.__mro__!r})" if inspect.isclass(v) else repr(v)
+-                for k, v in x.__dict__.items()
+-                if not k.startswith("_")
+-            }
++            return sorted(
++                canonical(k, v) for k, v in vars(x).items() if not k.startswith("_")
++            )
+ 
+         self.assertEqual(attrs(a), attrs(b))
+ 
+diff --git a/tests/test_mypy.yml b/tests/test_mypy.yml
+index 46819df..d4f9c86 100644
+--- a/tests/test_mypy.yml
++++ b/tests/test_mypy.yml
+@@ -6,6 +6,7 @@
+     follow_imports = silent
+     plugins = marshmallow_dataclass.mypy
+     show_error_codes = true
++    python_version = 3.6
+   env:
+     - PYTHONPATH=.
+   main: |
