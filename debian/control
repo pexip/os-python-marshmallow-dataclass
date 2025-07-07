@@ -9,7 +9,7 @@ Build-Depends:
  dh-python,
  pybuild-plugin-pyproject,
  python3-all,
- python3-marshmallow,
+ python3-marshmallow (>= 3.18.0),
  python3-pytest <!nocheck>,
  python3-setuptools,
  python3-typeguard <!nocheck>,
@@ -26,7 +26,6 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
 Recommends:
- python3-marshmallow-enum,
  python3-typing-inspect,
 Breaks: python3-typing-inspect (<< 0.8.0)
 Description: Automatic generation of marshmallow schemas from dataclasses
