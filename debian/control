@@ -10,7 +10,7 @@ Build-Depends:
  dh-python,
  pybuild-plugin-pyproject,
  python3-all,
- python3-marshmallow,
+ python3-marshmallow (>= 3.18.0),
  python3-pytest <!nocheck>,
  python3-setuptools,
  python3-typeguard <!nocheck>,

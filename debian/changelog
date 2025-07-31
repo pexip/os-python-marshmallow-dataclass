@@ -1,3 +1,11 @@
+python-marshmallow-dataclass (8.5.14-2) unstable; urgency=medium
+
+  * Team upload.
+  * Drop obsolete python3-marshmallow-enum Recommends and test dependency in
+    favour of python3-marshmallow (>= 3.18.0) (closes: #1040068).
+
+ -- Colin Watson <cjwatson@debian.org>  Mon, 07 Jul 2025 22:00:40 +0100
+
 python-marshmallow-dataclass (8.5.14-1+pexip25u1) pexip-trixie; urgency=medium
 
   * Initial trixie build
